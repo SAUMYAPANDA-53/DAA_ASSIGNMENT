@@ -1,3 +1,95 @@
+/*1.
+ALGORITHM FFT(a, N, invert)
+    Input: Vector 'a' of complex numbers of size N (N must be a power of 2),
+           Boolean flag 'invert' (FALSE for Forward FFT, TRUE for Inverse FFT)
+    Output: Transformed vector of size N
+
+    IF N == 1 THEN
+        RETURN a
+    END IF
+
+    // Step 1: Divide into Even and Odd indexed sub-arrays
+    Initialize aEven[N / 2]
+    Initialize aOdd[N / 2]
+
+    FOR i = 0 TO (N / 2) - 1 DO
+        aEven[i] = a[2 * i]
+        aOdd[i]  = a[2 * i + 1]
+    END FOR
+
+    // Step 2: Conquer (Recursive FFT calls)
+    yEven = FFT(aEven, N / 2, invert)
+    yOdd  = FFT(aOdd, N / 2, invert)
+
+    // Step 3: Combine using Primitive Roots of Unity
+    Initialize y[N]
+    angle = (2 * PI / N) * (invert ? -1 : 1)
+    
+    w  = 1 + 0i                       // Complex number 1
+    wN = cos(angle) + i * sin(angle)   // Twiddle factor base
+
+    FOR k = 0 TO (N / 2) - 1 DO
+        y[k]           = yEven[k] + w * yOdd[k]
+        y[k + (N / 2)] = yEven[k] - w * yOdd[k]
+
+        IF invert THEN
+            y[k]           = y[k] / 2
+            y[k + (N / 2)] = y[k + (N / 2)] / 2
+        END IF
+
+        w = w * wN
+    END FOR
+
+    RETURN y
+END ALGORITHM
+
+2.
+ALGORITHM VectorConvolutionFFT(A, B, m, n)
+    Input: Array A of size m, Array B of size n (n >= m)[cite: 1]
+    Output: Resulting convolved array C of size m + n - 1
+
+    // Step 1: Find next power of 2 >= (m + n - 1)
+    targetSize = m + n - 1
+    N = 1
+    WHILE N < targetSize DO
+        N = N * 2
+    END WHILE
+
+    // Step 2: Zero-pad input vectors up to size N
+    Initialize paddedA[N] with 0
+    Initialize paddedB[N] with 0
+
+    FOR i = 0 TO m - 1 DO
+        paddedA[i] = A[i]
+    END FOR
+
+    FOR j = 0 TO n - 1 DO
+        paddedB[j] = B[j]
+    END FOR
+
+    // Step 3: Compute Point-Value representation via FFT
+    FA = FFT(paddedA, N, FALSE)
+    FB = FFT(paddedB, N, FALSE)
+
+    // Step 4: Pointwise multiplication in frequency domain O(N)
+    Initialize FC[N]
+    FOR k = 0 TO N - 1 DO
+        FC[k] = FA[k] * FB[k]
+    END FOR
+
+    // Step 5: Convert back using Inverse FFT (IFFT)
+    complexC = FFT(FC, N, TRUE)
+
+    // Step 6: Extract real part into output array C
+    Initialize C[targetSize]
+    FOR i = 0 TO targetSize - 1 DO
+        C[i] = REAL_PART(complexC[i])
+    END FOR
+
+    RETURN C
+END ALGORITHM
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
